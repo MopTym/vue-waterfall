@@ -1,0 +1,29 @@
+body {
+  margin: 5px;
+  font-family: Helvetica, sans-serif;
+}
+.item {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  font-size: 1.2em;
+  color: rgb(0,158,107);
+}
+.item:after {
+  content: attr(index);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+}
+.wf-transition {
+  transition: opacity .3s ease;
+  -webkit-transition: opacity .3s ease;
+}
+.wf-enter {
+  opacity: 0;
+}

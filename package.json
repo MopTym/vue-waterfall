@@ -1,0 +1,42 @@
+{
+  "name": "vue-waterfall",
+  "version": "0.1.0",
+  "description": "A waterfall layout component for Vue.js",
+  "main": "lib/vue-waterfall.min.js",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "webpack --config build/webpack.min.conf.js",
+    "test": "echo '42'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MopTym/vue-waterfall.git"
+  },
+  "keywords": [
+    "waterfall",
+    "vue",
+    "pinterest",
+    "layout"
+  ],
+  "author": "MopTym <moptym@163.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MopTym/vue-waterfall/issues"
+  },
+  "homepage": "https://github.com/MopTym/vue-waterfall",
+  "devDependencies": {
+    "babel-core": "^6.5.2",
+    "babel-loader": "^6.2.2",
+    "babel-plugin-transform-runtime": "^6.5.2",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-runtime": "^5.8.35",
+    "copy-webpack-plugin": "^1.1.1",
+    "css-loader": "^0.23.1",
+    "vue-html-loader": "^1.1.0",
+    "vue-loader": "^8.1.1",
+    "vue-style-loader": "^1.0.0",
+    "webpack": "^1.12.13"
+  }
+}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="user-scalable=0">
+    <title>Vertical Line</title>
+    <link rel="stylesheet" href="./common/css/style.css">
+  </head>
+  <body>
+    <div id="app">
+      <waterfall :align="align" :line-gap="200" :min-line-gap="100" :max-line-gap="220" :single-max-width="300">
+        <waterfall-slot v-for="item in items" :width="item.width" :height="item.height" transition="wf">
+          <div class="item" :style="item.style" :index="$index"></div>
+        </waterfall-slot>
+      </waterfall>
+    </div>
+    <script src="https://cdn.jsdelivr.net/vue/latest/vue.js"></script>
+    <script src="http://app.moptym.com/cdn/vue-waterfall/vue-waterfall.min.js"></script>
+    <script src="./common/js/item-factory.js"></script>
+    <script>
+
+          var app = new Vue({
+            el: '#app',
+            components: {
+              'waterfall': Waterfall.waterfall,
+              'waterfall-slot': Waterfall.waterfallSlot
+            },
+            data: {
+              align: 'center',
+              items: ItemFactory.get(100),
+              isBusy: false
+            },
+            methods: {
+              addItems: function () {
+                if (!this.isBusy && this.items.length < 1000) {
+                  this.isBusy = true
+                  this.items.push.apply(this.items, ItemFactory.get(50))
+                }
+              }
+            },
+            events: {
+              'wf-reflowed': function () {
+                this.isBusy = false
+              }
+            }
+          })
+
+          window.addEventListener('scroll', function () {
+            var scrollTop = document.documentElement.scrollTop || document.body.scrollTop
+            if (scrollTop + window.innerHeight >= document.body.clientHeight) {
+              app.addItems()
+            }
+          })
+
+    </script>
+  </body>
+</html>
