@@ -1,5 +1,5 @@
 <template>
-  <div class="vue-waterfall-slot" :style="style" v-show="isShow">
+  <div class="vue-waterfall-slot" v-show="isShow">
     <slot></slot>
   </div>
 </template>
@@ -17,13 +17,6 @@
 
 export default {
   data: () => ({
-    style: {
-      top: '',
-      left: '',
-      width: '',
-      height: '',
-      display: 'none'
-    },
     isShow: false
   }),
   props: {
@@ -34,6 +27,12 @@ export default {
     height: {
       required: true,
       validator: (val) => val >= 0
+    },
+    order: {
+      default: 0
+    },
+    moveClass: {
+      default: ''
     }
   },
   methods: {
@@ -42,12 +41,12 @@ export default {
     },
     getMeta () {
       return {
+        node: this.$el,
+        order: this.order,
         width: this.width,
-        height: this.height
+        height: this.height,
+        moveClass: this.moveClass
       }
-    },
-    getStyle () {
-      return this.style
     }
   },
   compiled () {

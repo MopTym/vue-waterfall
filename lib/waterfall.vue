@@ -45,11 +45,15 @@ export default {
     },
     fixedHeight: {
       default: false
+    },
+    watch: {
+      default: {}
     }
   },
   data: () => ({
     style: {
-      height: ''
+      height: '',
+      overflow: ''
     }
   }),
   methods: {
@@ -75,16 +79,35 @@ export default {
       this.minLineGap,
       this.maxLineGap,
       this.singleMaxWidth,
-      this.fixedHeight
+      this.fixedHeight,
+      this.watch
     ), this.reflowHandler)
+    on(this.$el, transitionEndEvent, tidyUpAnimations, true)
   }
 }
+
+// https://github.com/vuejs/vue/blob/dev/src/util/env.js
+const isWebkitTrans =
+  window.ontransitionend === undefined &&
+  window.onwebkittransitionend !== undefined
+
+// https://github.com/vuejs/vue/blob/dev/src/util/env.js
+const transitionEndEvent = isWebkitTrans
+  ? 'webkitTransitionEnd'
+  : 'transitionend'
 
 function autoResizeHandler () {
   if (this.autoResize) {
     window.addEventListener('resize', this.reflowHandler, false)
   } else {
     window.removeEventListener('resize', this.reflowHandler, false)
+  }
+}
+
+function tidyUpAnimations (event) {
+  let node = event.target
+  if (node._wfMoveClass) {
+    removeClass(node, node._wfMoveClass)
   }
 }
 
@@ -97,17 +120,16 @@ function getReflowHandler (token) {
 
 function reflow () {
   let width = this.$el.clientWidth
-
-  let slots = this.$children
-  let metas = slots.map((slot) => slot.getMeta())
-  let styles = slots.map((slot) => slot.getStyle())
-  this.virtualStyles = getArrayFillWith(() => ({}), styles.length)
+  let metas = this.$children.map((slot) => slot.getMeta())
+  metas.sort((a, b) => a.order - b.order)
+  this.virtualStyles = metas.map(() => ({}))
   calculate(this, metas, this.virtualStyles)
   setTimeout(() => {
     if (isScrollBarVisibilityChange(this.$el, width)) {
       calculate(this, metas, this.virtualStyles)
     }
-    applyStyles(this.virtualStyles, styles)
+    this.style.overflow = 'hidden'
+    render(this.virtualStyles, metas)
     this.$broadcast('wf-reflowed', [this])
     this.$dispatch('wf-reflowed', [this])
   }, 0)
@@ -298,13 +320,53 @@ function getLeft (width, contentWidth, align) {
   }
 }
 
-function applyStyles (src, des) {
-  src.forEach((style, i) => {
-    for (let prop in style) {
-      des[i][prop] = style[prop] + 'px'
+function render (styles, metas) {
+  let metasNeedToMoveByTransform = metas.filter((meta) => meta.moveClass)
+  let firstRects = getRects(metasNeedToMoveByTransform)
+  applyStyles(styles, metas)
+  let lastRects = getRects(metasNeedToMoveByTransform)
+  metasNeedToMoveByTransform.forEach((meta, i) => {
+    meta.node._wfMoveClass = meta.moveClass
+    setTransform(meta.node, firstRects[i], lastRects[i])
+  })
+  document.body.clientWidth // forced reflow
+  metasNeedToMoveByTransform.forEach((meta) => {
+    addClass(meta.node, meta.moveClass)
+    clearTransform(meta.node)
+  })
+}
+
+function getRects (metas) {
+  return metas.map((meta) => meta.node.getBoundingClientRect())
+}
+
+function applyStyles (styles, metas) {
+  styles.forEach((srcStyle, i) => {
+    let style = metas[i].node.style
+    for (let prop in srcStyle) {
+      style[prop] = srcStyle[prop] + 'px'
     }
   })
 }
+
+function setTransform (node, firstRect, lastRect) {
+  let dx = firstRect.left - lastRect.left
+  let dy = firstRect.top - lastRect.top
+  let sw = firstRect.width / lastRect.width
+  let sh = firstRect.height / lastRect.height
+  node.style.transform =
+  node.style.WebkitTransform = `translate(${dx}px,${dy}px) scale(${sw},${sh})`
+  node.style.transitionDuration = '0s'
+}
+
+function clearTransform (node) {
+  node.style.transform = node.style.WebkitTransform = ''
+  node.style.transitionDuration = ''
+}
+
+/**
+ * util
+ */
 
 function getArrayFillWith (item, count) {
   let getter = (typeof item === 'function') ? () => item() : () => item
@@ -313,6 +375,40 @@ function getArrayFillWith (item, count) {
     arr[i] = getter()
   }
   return arr
+}
+
+function addClass (elem, name) {
+  if (!hasClass(elem, name)) {
+    let cur = attr(elem, 'class').trim()
+    let res = (cur + ' ' + name).trim()
+    attr(elem, 'class', res)
+  }
+}
+
+function removeClass (elem, name) {
+  let reg = new RegExp('\\s*\\b' + name + '\\b\\s*', 'g')
+  let res = attr(elem, 'class').replace(reg, ' ').trim()
+  attr(elem, 'class', res)
+}
+
+function hasClass (elem, name) {
+  return (new RegExp('\\b' + name + '\\b')).test(attr(elem, 'class'))
+}
+
+function attr (elem, name, value) {
+  if (typeof value !== 'undefined') {
+    elem.setAttribute(name, value)
+  } else {
+    return elem.getAttribute(name) || ''
+  }
+}
+
+function on (elem, type, listener, useCapture = false) {
+  elem.addEventListener(type, listener, useCapture)
+}
+
+function off (elem, type, listener, useCapture = false) {
+  elem.removeEventListener(type, listener, useCapture)
 }
 
 </script>

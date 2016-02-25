@@ -1,9 +1,12 @@
 var ItemFactory = (function () {
 
+  var lastIndex = 0
+
   function generateRandomItems (count) {
     var items = [], i
     for (i = 0; i < count; i++) {
       items[i] = {
+        index: lastIndex++,
         style: {
           background: getRandomColor()
         },

@@ -86,9 +86,9 @@ new Vue({
 ### HTML structure
 
 ```html
-<waterfall :line-gap="200">
+<waterfall :line-gap="200" :watch="items">
   <!-- each component is wrapped by a waterfall slot -->
-  <waterfall-slot v-for="item in items" :width="item.width" :height="item.height">
+  <waterfall-slot v-for="item in items" :width="item.width" :height="item.height" :order="$index">
     <!--
       your component
     -->
@@ -154,6 +154,11 @@ new Vue({
             <td><code>200</code></td>
             <td>The minimal time interval (ms) between reflow actions.</td>
         </tr>
+        <tr>
+            <td>watch</td>
+            <td><code>{}</code></td>
+            <td>Watch something, reflow when it changes.</td>
+        </tr>
     </tbody>
 </table>
 
@@ -179,8 +184,24 @@ new Vue({
             <td>-</td>
             <td>Required. The height of slot.</td>
         </tr>
+        <tr>
+            <td>order</td>
+            <td><code>0</code></td>
+            <td>The order of slot, often be set to <code>$index</code> in <code>v-for</code> .</td>
+        </tr>
+        <tr>
+            <td>move-class</td>
+            <td>-</td>
+            <td>Class for transition. see <a href="https://github.com/vuejs/vue-animated-list" target="_blank">vue-animated-list</a> .</td>
+        </tr>
     </tbody>
 </table>
+
+## Transition
+
+Inspired by [vue-animated-list](https://github.com/vuejs/vue-animated-list) , vue-waterfall supports moving elements with `translate` in transition, click on the [demo](http://app.moptym.com/vue-waterfall/demo/vertical-line.html) page to see it.
+
+![preview](shuffle.gif)
 
 ## Events
 

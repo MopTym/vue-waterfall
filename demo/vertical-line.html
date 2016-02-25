@@ -7,12 +7,33 @@
     <meta name="viewport" content="user-scalable=0">
     <title>Vertical Line</title>
     <link rel="stylesheet" href="./common/css/style.css">
+    <style>
+      .item-move {
+        transition: all .5s cubic-bezier(.55,0,.1,1);
+        -webkit-transition: all .5s cubic-bezier(.55,0,.1,1);
+      }
+    </style>
   </head>
   <body>
     <div id="app">
-      <waterfall :align="align" :line-gap="200" :min-line-gap="100" :max-line-gap="220" :single-max-width="300">
-        <waterfall-slot v-for="item in items" :width="item.width" :height="item.height" transition="wf">
-          <div class="item" :style="item.style" :index="$index"></div>
+      <waterfall
+        :align="align"
+        :line-gap="200"
+        :min-line-gap="100"
+        :max-line-gap="220"
+        :single-max-width="300"
+        :watch="items"
+      >
+        <!-- each component is wrapped by a waterfall slot -->
+        <waterfall-slot
+          v-for="item in items"
+          :width="item.width"
+          :height="item.height"
+          :order="$index"
+          move-class="item-move"
+          transition="wf"
+        >
+          <div class="item" :style="item.style" :index="item.index"></div>
         </waterfall-slot>
       </waterfall>
     </div>
@@ -34,10 +55,15 @@
             },
             methods: {
               addItems: function () {
-                if (!this.isBusy && this.items.length < 1000) {
+                if (!this.isBusy && this.items.length < 500) {
                   this.isBusy = true
                   this.items.push.apply(this.items, ItemFactory.get(50))
                 }
+              },
+              shuffle: function () {
+                this.items.sort(function () {
+                  return Math.random() - 0.5
+                })
               }
             },
             events: {
@@ -46,6 +72,11 @@
               }
             }
           })
+
+          document.body.addEventListener('click', function () {
+            app.shuffle()
+            // app.$broadcast('wf-reflow') // manually trigger reflow action
+          }, false)
 
           window.addEventListener('scroll', function () {
             var scrollTop = document.documentElement.scrollTop || document.body.scrollTop
