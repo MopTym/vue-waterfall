@@ -41,6 +41,7 @@ export default {
     },
     getMeta () {
       return {
+        vm: this,
         node: this.$el,
         order: this.order,
         width: this.width,
@@ -52,6 +53,12 @@ export default {
   compiled () {
     this.$watch('width, height', this.notify)
     this.$once('wf-reflowed', () => this.isShow = true)
+    this.rect = {
+      top: 0,
+      left: 0,
+      width: 0,
+      height: 0
+    }
   },
   attached () {
     this.notify()

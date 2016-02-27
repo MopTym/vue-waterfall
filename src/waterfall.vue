@@ -13,6 +13,18 @@
 
 <script>
 
+// https://github.com/vuejs/vue/blob/dev/src/util/env.js
+const isWebkitTrans =
+  window.ontransitionend === undefined &&
+  window.onwebkittransitionend !== undefined
+
+// https://github.com/vuejs/vue/blob/dev/src/util/env.js
+const transitionEndEvent = isWebkitTrans
+  ? 'webkitTransitionEnd'
+  : 'transitionend'
+
+const MOVE_CLASS_PROP = '_wfMoveClass'
+
 export default {
   props: {
     autoResize: {
@@ -66,8 +78,8 @@ export default {
       this.reflowHandler()
     }
   },
-  created () {
-    this.virtualStyles = []
+  compiled () {
+    this.virtualRects = []
   },
   ready () {
     this.autoResizeHandler()
@@ -86,16 +98,6 @@ export default {
   }
 }
 
-// https://github.com/vuejs/vue/blob/dev/src/util/env.js
-const isWebkitTrans =
-  window.ontransitionend === undefined &&
-  window.onwebkittransitionend !== undefined
-
-// https://github.com/vuejs/vue/blob/dev/src/util/env.js
-const transitionEndEvent = isWebkitTrans
-  ? 'webkitTransitionEnd'
-  : 'transitionend'
-
 function autoResizeHandler () {
   if (this.autoResize) {
     window.addEventListener('resize', this.reflowHandler, false)
@@ -106,8 +108,9 @@ function autoResizeHandler () {
 
 function tidyUpAnimations (event) {
   let node = event.target
-  if (node._wfMoveClass) {
-    removeClass(node, node._wfMoveClass)
+  let moveClass = node[MOVE_CLASS_PROP]
+  if (moveClass) {
+    removeClass(node, moveClass)
   }
 }
 
@@ -122,14 +125,14 @@ function reflow () {
   let width = this.$el.clientWidth
   let metas = this.$children.map((slot) => slot.getMeta())
   metas.sort((a, b) => a.order - b.order)
-  this.virtualStyles = metas.map(() => ({}))
-  calculate(this, metas, this.virtualStyles)
+  this.virtualRects = metas.map(() => ({}))
+  calculate(this, metas, this.virtualRects)
   setTimeout(() => {
     if (isScrollBarVisibilityChange(this.$el, width)) {
-      calculate(this, metas, this.virtualStyles)
+      calculate(this, metas, this.virtualRects)
     }
     this.style.overflow = 'hidden'
-    render(this.virtualStyles, metas)
+    render(this.virtualRects, metas)
     this.$broadcast('wf-reflowed', [this])
     this.$dispatch('wf-reflowed', [this])
   }, 0)
@@ -159,18 +162,18 @@ function getOptions (vm) {
 
 var verticalLineProcessor = (() => {
 
-  function calculate (vm, options, metas, styles) {
+  function calculate (vm, options, metas, rects) {
     let width = vm.$el.clientWidth
     let strategy = getRowStrategy(width, options)
     let tops = getArrayFillWith(0, strategy.count)
     metas.forEach((meta, index) => {
       let offset = tops.reduce((last, top, i) => top < tops[last] ? i : last, 0)
-      let style = styles[index]
-      style.top = tops[offset]
-      style.left = strategy.left + strategy.width * offset
-      style.width = strategy.width
-      style.height = meta.height * (options.fixedHeight ? 1 : strategy.width / meta.width)
-      tops[offset] = tops[offset] + style.height
+      let rect = rects[index]
+      rect.top = tops[offset]
+      rect.left = strategy.left + strategy.width * offset
+      rect.width = strategy.width
+      rect.height = meta.height * (options.fixedHeight ? 1 : strategy.width / meta.width)
+      tops[offset] = tops[offset] + rect.height
     })
     vm.style.height = Math.max.apply(null, tops) + 'px'
   }
@@ -219,21 +222,21 @@ var verticalLineProcessor = (() => {
 
 var horizontalLineProcessor = (() => {
 
-  function calculate (vm, options, metas, styles) {
+  function calculate (vm, options, metas, rects) {
     let width = vm.$el.clientWidth
     let total = metas.length
     let top = 0
     let offset = 0
     while (offset < total) {
       let strategy = getRowStrategy(width, options, metas, offset)
-      for (let i = 0, left = 0, meta, style; i < strategy.count; i++) {
+      for (let i = 0, left = 0, meta, rect; i < strategy.count; i++) {
         meta = metas[offset + i]
-        style = styles[offset + i]
-        style.top = top
-        style.left = strategy.left + left
-        style.width = meta.width * strategy.height / meta.height
-        style.height = strategy.height
-        left += style.width
+        rect = rects[offset + i]
+        rect.top = top
+        rect.left = strategy.left + left
+        rect.width = meta.width * strategy.height / meta.height
+        rect.height = strategy.height
+        left += rect.width
       }
       offset += strategy.count
       top += strategy.height
@@ -320,13 +323,13 @@ function getLeft (width, contentWidth, align) {
   }
 }
 
-function render (styles, metas) {
+function render (rects, metas) {
   let metasNeedToMoveByTransform = metas.filter((meta) => meta.moveClass)
   let firstRects = getRects(metasNeedToMoveByTransform)
-  applyStyles(styles, metas)
+  applyRects(rects, metas)
   let lastRects = getRects(metasNeedToMoveByTransform)
   metasNeedToMoveByTransform.forEach((meta, i) => {
-    meta.node._wfMoveClass = meta.moveClass
+    meta.node[MOVE_CLASS_PROP] = meta.moveClass
     setTransform(meta.node, firstRects[i], lastRects[i])
   })
   document.body.clientWidth // forced reflow
@@ -337,14 +340,15 @@ function render (styles, metas) {
 }
 
 function getRects (metas) {
-  return metas.map((meta) => meta.node.getBoundingClientRect())
+  return metas.map((meta) => meta.vm.rect)
 }
 
-function applyStyles (styles, metas) {
-  styles.forEach((srcStyle, i) => {
+function applyRects (rects, metas) {
+  rects.forEach((rect, i) => {
     let style = metas[i].node.style
-    for (let prop in srcStyle) {
-      style[prop] = srcStyle[prop] + 'px'
+    metas[i].vm.rect = rect
+    for (let prop in rect) {
+      style[prop] = rect[prop] + 'px'
     }
   })
 }
