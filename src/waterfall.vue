@@ -95,14 +95,18 @@ export default {
       this.watch
     ), this.reflowHandler)
     on(this.$el, transitionEndEvent, tidyUpAnimations, true)
+  },
+  beforeDestroy () {
+    this.autoResizeHandler(false)
+    off(this.$el, transitionEndEvent, tidyUpAnimations, true)
   }
 }
 
-function autoResizeHandler () {
-  if (this.autoResize) {
-    window.addEventListener('resize', this.reflowHandler, false)
+function autoResizeHandler (autoResize) {
+  if (autoResize === false || !this.autoResize) {
+    off(window, 'resize', this.reflowHandler, false)
   } else {
-    window.removeEventListener('resize', this.reflowHandler, false)
+    on(window, 'resize', this.reflowHandler, false)
   }
 }
 
