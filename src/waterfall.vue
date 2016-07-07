@@ -126,6 +126,7 @@ function getReflowHandler (token) {
 }
 
 function reflow () {
+  if (!this.$el) { return }
   let width = this.$el.clientWidth
   let metas = this.$children.map((slot) => slot.getMeta())
   metas.sort((a, b) => a.order - b.order)
