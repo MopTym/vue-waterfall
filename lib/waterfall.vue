@@ -257,7 +257,7 @@ var horizontalLineProcessor = (() => {
     let finalSize = chooseFinalSize(lazySize, greedySize, width)
     let height = finalSize.height
     let fitContentWidth = finalSize.width
-    if (finalSize.count === 1 || options.singleMaxWidth >= width) {
+    if (finalSize.count === 1) {
       fitContentWidth = Math.min(options.singleMaxWidth, width)
       height = metas[offset].height * fitContentWidth / metas[offset].width
     }

@@ -1,6 +1,6 @@
 {
   "name": "vue-waterfall",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "A waterfall layout component for Vue.js",
   "main": "lib/vue-waterfall.min.js",
   "files": [
