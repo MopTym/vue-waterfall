@@ -8,6 +8,8 @@
 
 A waterfall layout component for Vue.js .
 
+This branch is compatible with Vue 1 , [master (latest)](https://github.com/MopTym/vue-waterfall) is compatible with Vue 2 .
+
 ## Demo
 
 - [Vertical line](http://app.moptym.com/vue-waterfall/demo/vertical-line.html)
@@ -17,7 +19,8 @@ A waterfall layout component for Vue.js .
 ## Installation
 
 ```shell
-npm install --save vue-waterfall
+# install version 0.x.x
+npm install --save vue-waterfall@0.*
 ```
 
 ## Usage
