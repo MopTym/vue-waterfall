@@ -37,7 +37,7 @@ export default {
   },
   methods: {
     notify () {
-      this.$dispatch('wf-reflow', [this])
+      this.$parent.$emit('reflow', this)
     },
     getMeta () {
       return {
@@ -50,20 +50,22 @@ export default {
       }
     }
   },
-  compiled () {
-    this.$watch('width, height', this.notify)
-    this.$once('wf-reflowed', () => this.isShow = true)
+  created () {
     this.rect = {
       top: 0,
       left: 0,
       width: 0,
       height: 0
     }
+    this.$watch('width, height', this.notify)
   },
-  attached () {
+  mounted () {
+    this.$parent.$once('reflowed', () => {
+      this.isShow = true
+    })
     this.notify()
   },
-  detached () {
+  destroyed () {
     this.notify()
   }
 }

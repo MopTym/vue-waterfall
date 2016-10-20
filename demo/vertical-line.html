@@ -23,21 +23,23 @@
         :max-line-gap="220"
         :single-max-width="300"
         :watch="items"
+        @reflowed="reflowed"
+        ref="waterfall"
       >
         <!-- each component is wrapped by a waterfall slot -->
         <waterfall-slot
-          v-for="item in items"
+          v-for="(item, index) in items"
           :width="item.width"
           :height="item.height"
-          :order="$index"
+          :order="index"
+          :key="item.index"
           move-class="item-move"
-          transition="wf"
         >
           <div class="item" :style="item.style" :index="item.index"></div>
         </waterfall-slot>
       </waterfall>
     </div>
-    <script src="https://cdn.jsdelivr.net/vue/1.0.25/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/vue/2.0.3/vue.min.js"></script>
     <script src="http://app.moptym.com/cdn/vue-waterfall/vue-waterfall.min.js"></script>
     <script src="./common/js/item-factory.js"></script>
     <script>
@@ -64,10 +66,8 @@
                 this.items.sort(function () {
                   return Math.random() - 0.5
                 })
-              }
-            },
-            events: {
-              'wf-reflowed': function () {
+              },
+              reflowed: function () {
                 this.isBusy = false
               }
             }
@@ -75,7 +75,7 @@
 
           document.body.addEventListener('click', function () {
             app.shuffle()
-            // app.$broadcast('wf-reflow') // manually trigger reflow action
+            // app.$refs.waterfall.$emit('reflow') // manually trigger reflow action
           }, false)
 
           window.addEventListener('scroll', function () {

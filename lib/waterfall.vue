@@ -60,6 +60,9 @@ export default {
     },
     watch: {
       default: {}
+    },
+    emitter: {
+      default: {}
     }
   },
   data: () => ({
@@ -69,20 +72,15 @@ export default {
     }
   }),
   methods: {
-    autoResizeHandler: autoResizeHandler,
     reflowHandler: getReflowHandler(),
-    reflow: reflow
+    autoResizeHandler,
+    reflow
   },
-  events: {
-    'wf-reflow': function () {
-      this.reflowHandler()
-    }
-  },
-  compiled () {
+  created () {
     this.virtualRects = []
-  },
-  ready () {
-    this.autoResizeHandler()
+    this.$on('reflow', () => {
+      this.reflowHandler()
+    })
     this.$watch('autoResize', this.autoResizeHandler)
     this.$watch(() => (
       this.align,
@@ -94,7 +92,10 @@ export default {
       this.fixedHeight,
       this.watch
     ), this.reflowHandler)
+  },
+  mounted () {
     on(this.$el, transitionEndEvent, tidyUpAnimations, true)
+    this.autoResizeHandler(this.autoResize)
   },
   beforeDestroy () {
     this.autoResizeHandler(false)
@@ -138,8 +139,7 @@ function reflow () {
     }
     this.style.overflow = 'hidden'
     render(this.virtualRects, metas)
-    this.$broadcast('wf-reflowed', [this])
-    this.$dispatch('wf-reflowed', [this])
+    this.$emit('reflowed', this)
   }, 0)
 }
 

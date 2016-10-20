@@ -8,6 +8,8 @@
 
 A waterfall layout component for Vue.js .
 
+Branch [0.x (version 0.x.x)](https://github.com/MopTym/vue-waterfall/tree/0.x) is compatible with Vue 1 .
+
 ## Demo
 
 - [Vertical line](http://app.moptym.com/vue-waterfall/demo/vertical-line.html)
@@ -187,7 +189,12 @@ new Vue({
         <tr>
             <td>order</td>
             <td><code>0</code></td>
-            <td>The order of slot, often be set to <code>$index</code> in <code>v-for</code> .</td>
+            <td>The order of slot, often be set to <code>index</code> in <code>v-for</code> .</td>
+        </tr>
+        <tr>
+            <td>key</td>
+            <td><code>''</code></td>
+            <td>The unique identification of slot, required for transition.</td>
         </tr>
         <tr>
             <td>move-class</td>
@@ -201,22 +208,27 @@ new Vue({
 
 Inspired by [vue-animated-list](https://github.com/vuejs/vue-animated-list) , vue-waterfall supports moving elements with `translate` in transition, click on the [demo](http://app.moptym.com/vue-waterfall/demo/vertical-line.html) page to see it.
 
+vue-waterfall has not supported `<transition-group>` in Vue 2 ( [#10](https://github.com/MopTym/vue-waterfall/issues/10) ) .
+
 ![preview](shuffle.gif)
 
 ## Events
 
 ```js
-ON ( 'wf-reflow' ) { /* use 'wf-reflow' event to trigger reflow action */
+ON ( 'reflow' ) {
   reflow
 }
+// trigger reflow action: waterfallVm.$emit('reflow')
 ```
 
 ```js
 AFTER ( reflow ) {
-  broadcast 'wf-reflowed'
-  dispatch 'wf-reflowed'
+  emit 'reflowed'
 }
+// waterfallVm.$on('reflowed', () => { console.log('reflowed') })
 ```
+
+To
 
 ## Reactivity
 
