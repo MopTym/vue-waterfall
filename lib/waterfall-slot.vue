@@ -57,7 +57,10 @@ export default {
       width: 0,
       height: 0
     }
-    this.$watch('width, height', this.notify)
+    this.$watch(() => (
+      this.width,
+      this.height
+    ), this.notify)
   },
   mounted () {
     this.$parent.$once('reflowed', () => {

@@ -59,10 +59,7 @@ export default {
       default: false
     },
     watch: {
-      default: {}
-    },
-    emitter: {
-      default: {}
+      default: () => ({})
     }
   },
   data: () => ({
