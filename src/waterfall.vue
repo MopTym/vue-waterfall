@@ -13,16 +13,6 @@
 
 <script>
 
-// https://github.com/vuejs/vue/blob/dev/src/util/env.js
-const isWebkitTrans =
-  window.ontransitionend === undefined &&
-  window.onwebkittransitionend !== undefined
-
-// https://github.com/vuejs/vue/blob/dev/src/util/env.js
-const transitionEndEvent = isWebkitTrans
-  ? 'webkitTransitionEnd'
-  : 'transitionend'
-
 const MOVE_CLASS_PROP = '_wfMoveClass'
 
 export default {
@@ -78,7 +68,6 @@ export default {
     this.$on('reflow', () => {
       this.reflowHandler()
     })
-    this.$watch('autoResize', this.autoResizeHandler)
     this.$watch(() => (
       this.align,
       this.line,
@@ -91,12 +80,13 @@ export default {
     ), this.reflowHandler)
   },
   mounted () {
-    on(this.$el, transitionEndEvent, tidyUpAnimations, true)
+    this.$watch('autoResize', this.autoResizeHandler)
+    on(this.$el, getTransitionEndEvent(), tidyUpAnimations, true)
     this.autoResizeHandler(this.autoResize)
   },
   beforeDestroy () {
     this.autoResizeHandler(false)
-    off(this.$el, transitionEndEvent, tidyUpAnimations, true)
+    off(this.$el, getTransitionEndEvent(), tidyUpAnimations, true)
   }
 }
 
@@ -368,6 +358,16 @@ function setTransform (node, firstRect, lastRect) {
 function clearTransform (node) {
   node.style.transform = node.style.WebkitTransform = ''
   node.style.transitionDuration = ''
+}
+
+function getTransitionEndEvent () {
+  let isWebkitTrans =
+    window.ontransitionend === undefined &&
+    window.onwebkittransitionend !== undefined
+  let transitionEndEvent = isWebkitTrans
+    ? 'webkitTransitionEnd'
+    : 'transitionend'
+  return transitionEndEvent
 }
 
 /**
