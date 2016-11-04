@@ -48,6 +48,9 @@ export default {
     fixedHeight: {
       default: false
     },
+    grow: {
+      validator: (val) => val instanceof Array
+    },
     watch: {
       default: () => ({})
     }
@@ -78,6 +81,7 @@ export default {
       this.fixedHeight,
       this.watch
     ), this.reflowHandler)
+    this.$watch('grow', this.reflowHandler)
   },
   mounted () {
     this.$watch('autoResize', this.autoResizeHandler)
@@ -148,7 +152,8 @@ function getOptions (vm) {
     minLineGap: vm.minLineGap ? +vm.minLineGap : vm.lineGap,
     maxLineGap: vm.maxLineGap ? +vm.maxLineGap : vm.lineGap,
     singleMaxWidth: Math.max(vm.singleMaxWidth || 0, vm.maxLineGap),
-    fixedHeight: !!vm.fixedHeight
+    fixedHeight: !!vm.fixedHeight,
+    grow: vm.grow && vm.grow.map(val => +val)
   }
 }
 
@@ -156,18 +161,22 @@ var verticalLineProcessor = (() => {
 
   function calculate (vm, options, metas, rects) {
     let width = vm.$el.clientWidth
-    let strategy = getRowStrategy(width, options)
+    let grow = options.grow
+    let strategy = grow
+      ? getRowStrategyWithGrow(width, grow)
+      : getRowStrategy(width, options)
     let tops = getArrayFillWith(0, strategy.count)
     metas.forEach((meta, index) => {
       let offset = tops.reduce((last, top, i) => top < tops[last] ? i : last, 0)
+      let width = strategy.width[offset % strategy.count]
       let rect = rects[index]
       rect.top = tops[offset]
-      rect.left = strategy.left + strategy.width * offset
-      rect.width = strategy.width
-      rect.height = meta.height * (options.fixedHeight ? 1 : strategy.width / meta.width)
+      rect.left = strategy.left + (offset ? sum(strategy.width.slice(0, offset)) : 0)
+      rect.width = width
+      rect.height = meta.height * (options.fixedHeight ? 1 : width / meta.width)
       tops[offset] = tops[offset] + rect.height
     })
-    vm.style.height = Math.max.apply(null, tops) + 'px'
+    vm.style.height = Math.max.apply(Math, tops) + 'px'
   }
 
   function getRowStrategy (width, options) {
@@ -200,9 +209,18 @@ var verticalLineProcessor = (() => {
       }
     }
     return {
-      width: slotWidth,
+      width: getArrayFillWith(slotWidth, count),
       count: count,
       left: getLeft(width, slotWidth * count, options.align)
+    }
+  }
+
+  function getRowStrategyWithGrow (width, grow) {
+    let total = sum(grow)
+    return {
+      width: grow.map(val => width * val / total),
+      count: grow.length,
+      left: 0
     }
   }
 
@@ -313,6 +331,10 @@ function getLeft (width, contentWidth, align) {
     default:
       return 0
   }
+}
+
+function sum (arr) {
+  return arr.reduce((sum, val) => sum + val)
 }
 
 function render (rects, metas) {

@@ -14,7 +14,7 @@ Branch [0.x (version 0.x.x)](https://github.com/MopTym/vue-waterfall/tree/0.x) i
 
 - [Vertical line](http://app.moptym.com/vue-waterfall/demo/vertical-line.html)
 - [Horizontal line](http://app.moptym.com/vue-waterfall/demo/horizontal-line.html)
-
+- [Vertical line with grow](http://app.moptym.com/vue-waterfall/demo/vertical-line-with-grow.html)
 
 ## Installation
 
@@ -90,7 +90,13 @@ new Vue({
 ```html
 <waterfall :line-gap="200" :watch="items">
   <!-- each component is wrapped by a waterfall slot -->
-  <waterfall-slot v-for="(item, index) in items" :width="item.width" :height="item.height" :order="index" :key="item.id">
+  <waterfall-slot
+    v-for="(item, index) in items"
+    :width="item.width"
+    :height="item.height"
+    :order="index"
+    :key="item.id"
+  >
     <!--
       your component
     -->
@@ -140,6 +146,11 @@ new Vue({
             <td>fixed-height</td>
             <td><code>false</code></td>
             <td>Fix slot height when line = <code>v</code> .</td>
+        </tr>
+        <tr>
+            <td>grow</td>
+            <td>-</td>
+            <td>Number Array. Slot flex grow factors in horizontal direction when line = <code>v</code> . Ignore <code>*-gap</code> .</td>
         </tr>
         <tr>
             <td>align</td>
