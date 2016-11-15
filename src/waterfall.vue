@@ -111,7 +111,7 @@ function tidyUpAnimations (event) {
   }
 }
 
-function getReflowHandler () {
+function reflowHandler () {
   clearTimeout(this.token)
   this.token = setTimeout(this.reflow, this.interval)
 }
