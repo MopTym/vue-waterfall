@@ -59,10 +59,11 @@ export default {
     style: {
       height: '',
       overflow: ''
-    }
+    },
+    token: null
   }),
   methods: {
-    reflowHandler: getReflowHandler(),
+    reflowHandler,
     autoResizeHandler,
     reflow
   },
@@ -110,11 +111,9 @@ function tidyUpAnimations (event) {
   }
 }
 
-function getReflowHandler (token) {
-  return function () {
-    clearTimeout(token)
-    token = setTimeout(this.reflow, this.interval)
-  }
+function reflowHandler () {
+  clearTimeout(this.token)
+  this.token = setTimeout(this.reflow, this.interval)
 }
 
 function reflow () {
