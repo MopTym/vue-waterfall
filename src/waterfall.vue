@@ -144,13 +144,14 @@ function calculate (vm, metas, styles) {
 }
 
 function getOptions (vm) {
+  const maxLineGap = vm.maxLineGap ? +vm.maxLineGap : vm.lineGap
   return {
     align: ~['left', 'right', 'center'].indexOf(vm.align) ? vm.align : 'left',
     line: ~['v', 'h'].indexOf(vm.line) ? vm.line : 'v',
     lineGap: +vm.lineGap,
     minLineGap: vm.minLineGap ? +vm.minLineGap : vm.lineGap,
-    maxLineGap: vm.maxLineGap ? +vm.maxLineGap : vm.lineGap,
-    singleMaxWidth: Math.max(vm.singleMaxWidth || 0, vm.maxLineGap),
+    maxLineGap: maxLineGap,
+    singleMaxWidth: Math.max(vm.singleMaxWidth || 0, maxLineGap),
     fixedHeight: !!vm.fixedHeight,
     grow: vm.grow && vm.grow.map(val => +val)
   }
