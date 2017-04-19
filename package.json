@@ -1,6 +1,6 @@
 {
   "name": "vue-waterfall",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A waterfall layout component for Vue.js",
   "main": "lib/vue-waterfall.min.js",
   "files": [
@@ -34,7 +34,8 @@
     "babel-runtime": "^5.8.35",
     "copy-webpack-plugin": "^3.0.1",
     "css-loader": "^0.23.1",
-    "vue-loader": "^9.5.1",
+    "vue-loader": "^11.3.4",
+    "vue-template-compiler": "^2.2.6",
     "webpack": "^1.12.13"
   }
 }
