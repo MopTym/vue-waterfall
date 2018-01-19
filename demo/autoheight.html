@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="user-scalable=0">
+    <title>Vertical Line</title>
+    <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+    }
+      .vue-waterfall-slot {
+        background-color: #eee;
+        border: solid 1px #000;
+      }
+      .item:after {
+        content: attr(index);
+      }
+      .custom-comp {
+        position: absolute;
+        width: 100%;
+        /* the height value is based on content height */
+      }
+      /* simulate item heights */
+      .item-0 { height: 100px;border: 1px solid; }
+      .item-1 { height: 200px; border: 1px solid;}
+      .item-2 { height: 300px; border: 1px solid;}
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <waterfall
+        :line-gap="200"
+        :min-line-gap="100"
+        :max-line-gap="220"
+        :single-max-width="300"
+        :watch="items"
+      >
+        <waterfall-slot
+          v-for="(item, index) in items"
+          :width="item.width"
+          :height="item.height"
+          :key="index"
+        >
+          <custom-comp>
+            <div class="item" :class="'item-'+item.index" :index="item.index">
+            </div>
+          </custom-comp>
+        </waterfall-slot>
+      </waterfall>
+    </div>
+    <script src="https://cdn.jsdelivr.net/vue/2.2.6/vue.min.js"></script>
+    <script src="../lib/vue-waterfall.min.js"></script>
+    <script>
+      function pending (check, cb, interval, timeout) {
+        var startTime = Date.now()
+        ;(function handler () {
+          if (check()) {
+            cb()
+          } else if (Date.now() - startTime < timeout) {
+            setTimeout(handler, interval)
+          }
+        })()
+      }
+      var CustomComp = Vue.extend({
+        template: '<div class="custom-comp"><slot></slot></div>',
+        mounted: function () {
+          var self = this
+          pending(function () {
+            return !!self.$el.offsetHeight
+          }, function () {
+            console.log('el:', self.$el, 'offsetHeight:', self.$el.offsetHeight)
+            self.$parent.slotHeight = self.$el.offsetHeight
+            self.$parent.slotWidth = self.$el.offsetWidth
+          }, 50, 1000)
+        }
+      })
+      var app = new Vue({
+        el: '#app',
+        components: {
+          'waterfall': Waterfall.waterfall,
+          'waterfall-slot': Waterfall.waterfallSlot,
+          'custom-comp': CustomComp
+        },
+        data: {
+          items: [
+            /* width is much bigger than height */
+            { width: 1000, height: 1, index: 0 },
+            { width: 1000, height: 1, index: 1 },
+            { width: 1000, height: 1, index: 2 }
+          ]
+        }
+      })
+    </script>
+  </body>
+</html>
