@@ -16,9 +16,13 @@
 <script>
 
 export default {
-  data: () => ({
-    isShow: false
-  }),
+  data () {
+    return {
+      isShow: false,
+      slotWidth: this.width,
+      slotHeight: this.height
+    }
+  },
   props: {
     width: {
       required: true,
@@ -44,8 +48,8 @@ export default {
         vm: this,
         node: this.$el,
         order: this.order,
-        width: this.width,
-        height: this.height,
+        width: this.slotWidth,
+        height: this.slotHeight,
         moveClass: this.moveClass
       }
     }
@@ -58,8 +62,8 @@ export default {
       height: 0
     }
     this.$watch(() => (
-      this.width,
-      this.height
+      this.slotWidth,
+      this.slotHeight
     ), this.notify)
   },
   mounted () {
